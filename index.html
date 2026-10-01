@@ -1,0 +1,971 @@
+<title>НутриЧек / NutriCheck</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f5f7f2;
+  --bg2: #eef1ea;
+  --card: #ffffff;
+  --border: #d8e0d0;
+  --fg: #1a2214;
+  --fg2: #4a5e40;
+  --fg3: #7a9070;
+  --primary: #3d7a2e;
+  --primary-h: #2d5f20;
+  --green: #2e7d32;
+  --green-bg: #e8f5e9;
+  --yellow: #f57f17;
+  --yellow-bg: #fff8e1;
+  --red: #c62828;
+  --red-bg: #ffebee;
+  --header-h: 56px;
+  --nav-h: 64px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111a0e;
+    --bg2: #1a2614;
+    --card: #1e2e18;
+    --border: #2a3d22;
+    --fg: #dcebd4;
+    --fg2: #9ab88e;
+    --fg3: #6a8a60;
+    --primary: #5aab45;
+    --primary-h: #4d9238;
+    --green: #66bb6a;
+    --green-bg: #1b2f1c;
+    --yellow: #ffca28;
+    --yellow-bg: #2a2210;
+    --red: #ef5350;
+    --red-bg: #2a1010;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111a0e;
+  --bg2: #1a2614;
+  --card: #1e2e18;
+  --border: #2a3d22;
+  --fg: #dcebd4;
+  --fg2: #9ab88e;
+  --fg3: #6a8a60;
+  --primary: #5aab45;
+  --primary-h: #4d9238;
+  --green: #66bb6a;
+  --green-bg: #1b2f1c;
+  --yellow: #ffca28;
+  --yellow-bg: #2a2210;
+  --red: #ef5350;
+  --red-bg: #2a1010;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--fg);font-size:15px}
+body{display:flex;flex-direction:column;overflow:hidden}
+
+/* HEADER */
+.header{
+  position:sticky;top:env(safe-area-inset-top,0px);
+  height:var(--header-h);padding:0 16px;
+  background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:100;flex-shrink:0;
+}
+.logo{font-weight:700;font-size:18px;letter-spacing:-.3px}
+.logo span{opacity:.75;font-weight:400}
+.header-right{display:flex;gap:8px;align-items:center}
+.lang-btn{
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+  color:#fff;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:background .15s
+}
+.lang-btn:hover{background:rgba(255,255,255,.35)}
+
+/* NAV */
+.bottom-nav{
+  position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);
+  background:var(--card);border-top:1px solid var(--border);
+  display:flex;z-index:100;flex-shrink:0;
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 0;background:none;border:none;cursor:pointer;
+  color:var(--fg3);font-size:11px;font-weight:500;transition:color .15s;
+}
+.nav-btn.active{color:var(--primary)}
+.nav-btn .nav-icon{font-size:22px;line-height:1}
+
+/* PAGES */
+.pages{flex:1;overflow-y:auto;overflow-x:hidden}
+.page{display:none;padding:16px;padding-bottom:8px;min-height:100%}
+.page.active{display:block}
+
+/* UPLOAD AREA */
+.upload-area{
+  border:2px dashed var(--border);border-radius:16px;
+  padding:28px 16px;text-align:center;cursor:pointer;
+  background:var(--card);transition:border-color .2s,background .2s;
+  position:relative;
+}
+.upload-area:hover,.upload-area.drag{border-color:var(--primary);background:var(--bg2)}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:40px;margin-bottom:8px}
+.upload-text{color:var(--fg2);font-size:14px}
+.upload-text strong{color:var(--primary);display:block;font-size:15px;margin-bottom:4px}
+
+.photo-preview{position:relative;border-radius:12px;overflow:hidden;background:var(--bg2);margin-bottom:12px;max-height:220px;display:flex;align-items:center;justify-content:center}
+.photo-preview img{width:100%;max-height:220px;object-fit:cover;display:block}
+.clear-photo{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* TAG INPUT */
+.section-label{font-weight:600;font-size:13px;color:var(--fg3);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 8px}
+.tag-input-wrap{
+  background:var(--card);border:1.5px solid var(--border);border-radius:12px;
+  padding:8px;display:flex;flex-wrap:wrap;gap:6px;min-height:44px;
+  position:relative;cursor:text;
+}
+.tag-input-wrap:focus-within{border-color:var(--primary)}
+.tag{
+  background:var(--primary);color:#fff;border-radius:20px;
+  padding:3px 10px 3px 10px;font-size:13px;display:flex;align-items:center;gap:5px;
+}
+.tag-remove{background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:16px;line-height:1;padding:0}
+.tag-text-input{
+  border:none;outline:none;background:transparent;color:var(--fg);
+  font-size:14px;flex:1;min-width:100px;padding:2px 4px;
+}
+.suggestions{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--card);border:1.5px solid var(--primary);border-radius:10px;
+  box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:50;max-height:200px;overflow-y:auto;
+}
+.suggestion-item{
+  padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;
+  font-size:14px;transition:background .1s;
+}
+.suggestion-item:hover,.suggestion-item.focused{background:var(--bg2)}
+.suggestion-emoji{font-size:18px}
+
+/* ANALYZE BTN */
+.analyze-btn{
+  width:100%;padding:14px;background:var(--primary);color:#fff;border:none;
+  border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;
+  margin-top:14px;transition:background .15s;
+}
+.analyze-btn:hover{background:var(--primary-h)}
+.analyze-btn:disabled{opacity:.5;cursor:default}
+
+/* RESULTS */
+.results-section{margin-top:16px}
+.meal-score{
+  border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;
+}
+.meal-score.green{background:var(--green-bg);color:var(--green)}
+.meal-score.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.meal-score.red{background:var(--red-bg);color:var(--red)}
+.score-emoji{font-size:44px}
+.score-label{font-weight:700;font-size:18px;margin-top:4px}
+.score-desc{font-size:13px;opacity:.8;margin-top:2px}
+
+.food-result{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)}
+.food-result-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.food-emoji{font-size:26px}
+.food-name{font-weight:600;font-size:15px;flex:1}
+.traffic-light{font-size:22px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;display:flex;align-items:center;gap:3px}
+.badge.green{background:var(--green-bg);color:var(--green)}
+.badge.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.badge.red{background:var(--red-bg);color:var(--red)}
+.food-tip{font-size:12px;color:var(--fg3);line-height:1.5;font-style:italic}
+
+.save-meal-btn{
+  width:100%;padding:12px;background:var(--bg2);color:var(--primary);
+  border:1.5px solid var(--primary);border-radius:12px;font-size:15px;
+  font-weight:600;cursor:pointer;margin-top:6px;transition:background .15s;
+}
+.save-meal-btn:hover{background:var(--primary);color:#fff}
+
+/* PROFILE */
+.profile-section{margin-bottom:20px}
+.conditions-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.condition-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:12px;
+  padding:12px;cursor:pointer;transition:border-color .15s,background .15s;
+  display:flex;flex-direction:column;gap:4px;
+}
+.condition-card.active{border-color:var(--primary);background:var(--bg2)}
+.condition-card .cond-icon{font-size:22px}
+.condition-card .cond-name{font-size:13px;font-weight:600;color:var(--fg)}
+.condition-card .cond-check{font-size:16px;align-self:flex-end;color:var(--primary);margin-top:2px}
+
+.allergies-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.allergy-chip{
+  background:var(--card);border:1.5px solid var(--border);border-radius:20px;
+  padding:6px 14px;font-size:13px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:5px;color:var(--fg2);
+}
+.allergy-chip.active{background:var(--red-bg);border-color:var(--red);color:var(--red);font-weight:600}
+
+/* HISTORY */
+.history-empty{text-align:center;padding:48px 16px;color:var(--fg3);font-size:15px}
+.history-empty .empty-icon{font-size:48px;margin-bottom:12px}
+.history-item{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:12px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;
+  cursor:pointer;transition:border-color .15s;
+}
+.history-item:hover{border-color:var(--primary)}
+.history-thumb{width:60px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:26px}
+.history-thumb img{width:60px;height:60px;border-radius:8px;object-fit:cover;display:block}
+.history-info{flex:1;min-width:0}
+.history-foods{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-date{font-size:12px;color:var(--fg3);margin-top:2px}
+.history-score{font-size:20px;flex-shrink:0}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end}
+.modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--bg2);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:var(--fg);display:flex;align-items:center;justify-content:center}
+.modal-overlay[hidden]{display:none!important}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom,0px));
+  left:50%;transform:translateX(-50%) translateY(20px);
+  background:#333;color:#fff;padding:10px 20px;border-radius:24px;
+  font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:300;
+  white-space:nowrap;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* MISC */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.clear-history-btn{background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;padding:4px 0}
+</style>
+
+<header class="header">
+  <div class="logo">🥦 <span data-i18n="appName">НутриЧек</span></div>
+  <div class="header-right">
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+  </div>
+</header>
+
+<div class="pages">
+  <!-- ANALYZE PAGE -->
+  <div class="page active" id="pageAnalyze">
+    <div id="photoArea">
+      <div class="upload-area" id="uploadArea">
+        <input type="file" accept="image/*" id="photoInput" onchange="handlePhoto(this)">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">
+          <strong data-i18n="uploadTitle">Сфотографируй еду</strong>
+          <span data-i18n="uploadSub">или выбери из галереи</span>
+        </div>
+      </div>
+    </div>
+    <div id="previewArea" hidden>
+      <div class="photo-preview">
+        <img id="photoPreview" src="" alt="">
+        <button class="clear-photo" onclick="clearPhoto()" title="Удалить фото">✕</button>
+      </div>
+    </div>
+
+    <div class="section-label" data-i18n="foodLabel">Что на тарелке?</div>
+    <div style="position:relative">
+      <div class="tag-input-wrap" id="tagWrap" onclick="focusTagInput()">
+        <div id="tagsContainer"></div>
+        <input class="tag-text-input" id="tagInput" autocomplete="off"
+          data-i18n-placeholder="tagPlaceholder" placeholder="Введи название еды..."
+          oninput="onTagInput()" onkeydown="onTagKey(event)">
+      </div>
+      <div class="suggestions" id="suggestions" hidden></div>
+    </div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeFood()" data-i18n="analyzeBtn">🔍 Анализировать</button>
+
+    <div class="results-section" id="resultsSection" hidden></div>
+  </div>
+
+  <!-- PROFILE PAGE -->
+  <div class="page" id="pageProfile">
+    <div class="profile-section">
+      <div class="section-label" data-i18n="condLabel">Мои состояния здоровья</div>
+      <div class="conditions-grid" id="conditionsGrid"></div>
+    </div>
+    <div class="profile-section">
+      <div class="section-label" data-i18n="allergLabel">Аллергии / непереносимость</div>
+      <div class="allergies-wrap" id="allergiesWrap"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="pageHistory">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="section-label" style="margin:0" data-i18n="historyTitle">История приёмов</div>
+      <button class="clear-history-btn" onclick="clearHistory()" data-i18n="clearHistory">Очистить</button>
+    </div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navAnalyze" onclick="showPage('Analyze')">
+    <span class="nav-icon">📷</span>
+    <span data-i18n="navAnalyze">Анализ</span>
+  </button>
+  <button class="nav-btn" id="navProfile" onclick="showPage('Profile')">
+    <span class="nav-icon">👤</span>
+    <span data-i18n="navProfile">Профиль</span>
+  </button>
+  <button class="nav-btn" id="navHistory" onclick="showPage('History')">
+    <span class="nav-icon">📋</span>
+    <span data-i18n="navHistory">История</span>
+  </button>
+</nav>
+
+<div class="modal-overlay" id="modalOverlay" hidden onclick="closeModal(event)">
+  <div class="modal" id="modalContent">
+    <div class="modal-handle"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== TRANSLATIONS ===== */
+const T = {
+  ru: {
+    appName:'НутриЧек',
+    uploadTitle:'Сфотографируй еду',
+    uploadSub:'или выбери из галереи',
+    foodLabel:'Что на тарелке?',
+    tagPlaceholder:'Введи название еды...',
+    analyzeBtn:'🔍 Анализировать',
+    condLabel:'Мои состояния здоровья',
+    allergLabel:'Аллергии / непереносимость',
+    historyTitle:'История приёмов',
+    clearHistory:'Очистить',
+    navAnalyze:'Анализ',
+    navProfile:'Профиль',
+    navHistory:'История',
+    addFood:'Добавьте хотя бы один продукт',
+    noProfile:'Заполните профиль здоровья для персонального анализа',
+    saved:'Приём пищи сохранён ✓',
+    cleared:'История очищена',
+    historyEmpty:'История пустая',
+    historyEmptySub:'Результаты анализов появятся здесь',
+    saveMeal:'💾 Сохранить приём пищи',
+    scoreGreen:'Отличный выбор!',
+    scoreYellow:'Есть ограничения',
+    scoreRed:'Следует избегать',
+    overallScore:'Общая оценка приёма пищи',
+    canEat:'Можно',
+    caution:'Осторожно',
+    avoid:'Избегать',
+    unknown:'Не найдено в базе',
+    conditions:{
+      diabetes:'Диабет',cholesterol:'Холестерин',pressure:'Давление',
+      gastritis:'Гастрит',kidneys:'Почки',weight:'Вес',liver:'Печень',thyroid:'Щитовидная'
+    },
+    condIcons:{diabetes:'🩸',cholesterol:'💛',pressure:'❤️',gastritis:'🫁',kidneys:'🫘',weight:'⚖️',liver:'🟤',thyroid:'🦋'},
+    allergies:{gluten:'Глютен',lactose:'Лактоза',nuts:'Орехи',seafood:'Морепродукты',eggs:'Яйца',soy:'Соя',citrus:'Цитрусовые',honey:'Мёд'},
+    allergyIcons:{gluten:'🌾',lactose:'🥛',nuts:'🥜',seafood:'🦐',eggs:'🥚',soy:'🫘',citrus:'🍋',honey:'🍯'},
+  },
+  en: {
+    appName:'NutriCheck',
+    uploadTitle:'Take a food photo',
+    uploadSub:'or choose from gallery',
+    foodLabel:'What\'s on the plate?',
+    tagPlaceholder:'Enter food name...',
+    analyzeBtn:'🔍 Analyze',
+    condLabel:'My health conditions',
+    allergLabel:'Allergies / intolerances',
+    historyTitle:'Meal history',
+    clearHistory:'Clear',
+    navAnalyze:'Analyze',
+    navProfile:'Profile',
+    navHistory:'History',
+    addFood:'Add at least one food item',
+    noProfile:'Fill in your health profile for personalized analysis',
+    saved:'Meal saved ✓',
+    cleared:'History cleared',
+    historyEmpty:'No history yet',
+    historyEmptySub:'Analysis results will appear here',
+    saveMeal:'💾 Save meal',
+    scoreGreen:'Great choice!',
+    scoreYellow:'Some limitations',
+    scoreRed:'Should be avoided',
+    overallScore:'Overall meal rating',
+    canEat:'OK',
+    caution:'Caution',
+    avoid:'Avoid',
+    unknown:'Not in database',
+    conditions:{
+      diabetes:'Diabetes',cholesterol:'Cholesterol',pressure:'Blood pressure',
+      gastritis:'Gastritis',kidneys:'Kidneys',weight:'Weight',liver:'Liver',thyroid:'Thyroid'
+    },
+    condIcons:{diabetes:'🩸',cholesterol:'💛',pressure:'❤️',gastritis:'🫁',kidneys:'🫘',weight:'⚖️',liver:'🟤',thyroid:'🦋'},
+    allergies:{gluten:'Gluten',lactose:'Lactose',nuts:'Nuts',seafood:'Seafood',eggs:'Eggs',soy:'Soy',citrus:'Citrus',honey:'Honey'},
+    allergyIcons:{gluten:'🌾',lactose:'🥛',nuts:'🥜',seafood:'🦐',eggs:'🥚',soy:'🫘',citrus:'🍋',honey:'🍯'},
+  }
+};
+
+/* ===== CONDITIONS ===== */
+const CONDITIONS = ['diabetes','cholesterol','pressure','gastritis','kidneys','weight','liver','thyroid'];
+const ALLERGIES = ['gluten','lactose','nuts','seafood','eggs','soy','citrus','honey'];
+
+/* ===== FOOD DATABASE ===== */
+// ratings: 0=green(ok), 1=yellow(caution), 2=red(avoid)
+const FOOD_DB = [
+  // SUGARS & SWEETS
+  {id:'sugar',emoji:'🍚',names:{ru:['сахар','сахар белый'],en:['sugar','white sugar']},label:{ru:'Сахар',en:'Sugar'},
+   ratings:{diabetes:2,cholesterol:1,pressure:1,gastritis:1,kidneys:1,weight:2,liver:1,thyroid:1},allergens:[],
+   tips:{ru:'Резко повышает глюкозу крови',en:'Spikes blood glucose sharply'}},
+  {id:'honey',emoji:'🍯',names:{ru:['мёд'],en:['honey']},label:{ru:'Мёд',en:'Honey'},
+   ratings:{diabetes:1,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:['honey'],
+   tips:{ru:'Лучше мёда, но умеренно при диабете',en:'Better than sugar, but moderate intake for diabetes'}},
+  {id:'cake',emoji:'🎂',names:{ru:['торт','пирог','пирожное'],en:['cake','pastry','pie']},label:{ru:'Торт / пирожное',en:'Cake / pastry'},
+   ratings:{diabetes:2,cholesterol:2,pressure:1,gastritis:1,kidneys:1,weight:2,liver:2,thyroid:1},allergens:['gluten','eggs','lactose'],
+   tips:{ru:'Содержит много сахара, жира и калорий',en:'High in sugar, fat and calories'}},
+  {id:'chocolate',emoji:'🍫',names:{ru:['шоколад','тёмный шоколад','горький шоколад'],en:['chocolate','dark chocolate']},label:{ru:'Шоколад',en:'Chocolate'},
+   ratings:{diabetes:1,cholesterol:1,pressure:0,gastritis:1,kidneys:1,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Тёмный ≥70% — умеренно полезен',en:'Dark ≥70% cocoa has moderate benefits'}},
+  {id:'icecream',emoji:'🍦',names:{ru:['мороженое'],en:['ice cream']},label:{ru:'Мороженое',en:'Ice cream'},
+   ratings:{diabetes:2,cholesterol:1,pressure:1,gastritis:2,kidneys:1,weight:2,liver:1,thyroid:1},allergens:['lactose'],
+   tips:{ru:'Холодное раздражает слизистую при гастрите',en:'Cold irritates the stomach lining in gastritis'}},
+  // BREAD & GRAINS
+  {id:'white_bread',emoji:'🍞',names:{ru:['белый хлеб','батон','хлеб белый'],en:['white bread','baguette']},label:{ru:'Белый хлеб',en:'White bread'},
+   ratings:{diabetes:2,cholesterol:1,pressure:1,gastritis:1,kidneys:1,weight:2,liver:1,thyroid:1},allergens:['gluten'],
+   tips:{ru:'Высокий гликемический индекс, лучше цельнозерновой',en:'High glycemic index; wholegrain bread is better'}},
+  {id:'rye_bread',emoji:'🍞',names:{ru:['ржаной хлеб','чёрный хлеб','бородинский'],en:['rye bread','dark bread']},label:{ru:'Ржаной хлеб',en:'Rye bread'},
+   ratings:{diabetes:1,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:1,liver:0,thyroid:0},allergens:['gluten'],
+   tips:{ru:'Богат клетчаткой, умеренно при гастрите',en:'High fiber; moderate intake for gastritis'}},
+  {id:'oatmeal',emoji:'🥣',names:{ru:['овсянка','овсяная каша','геркулес'],en:['oatmeal','porridge','oats']},label:{ru:'Овсяная каша',en:'Oatmeal'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['gluten'],
+   tips:{ru:'Отличный завтрак, снижает холестерин',en:'Excellent breakfast, lowers cholesterol'}},
+  {id:'buckwheat',emoji:'🍚',names:{ru:['гречка','гречневая каша'],en:['buckwheat','buckwheat porridge']},label:{ru:'Гречка',en:'Buckwheat'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Богата рутином и железом, отличный выбор',en:'Rich in rutin and iron, excellent choice'}},
+  {id:'rice',emoji:'🍚',names:{ru:['рис','рисовая каша'],en:['rice','rice porridge']},label:{ru:'Рис',en:'Rice'},
+   ratings:{diabetes:1,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Белый рис умеренно повышает глюкозу',en:'White rice moderately raises glucose'}},
+  {id:'pasta',emoji:'🍝',names:{ru:['макароны','паста','спагетти'],en:['pasta','spaghetti','noodles']},label:{ru:'Макароны',en:'Pasta'},
+   ratings:{diabetes:1,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:['gluten'],
+   tips:{ru:'Из твёрдых сортов пшеницы предпочтительнее',en:'Durum wheat pasta is preferred'}},
+  // VEGETABLES
+  {id:'broccoli',emoji:'🥦',names:{ru:['брокколи'],en:['broccoli']},label:{ru:'Брокколи',en:'Broccoli'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:1},allergens:[],
+   tips:{ru:'Осторожно при гипотиреозе, крестоцветные подавляют ЩЖ',en:'Caution in hypothyroidism; cruciferous may suppress thyroid'}},
+  {id:'carrot',emoji:'🥕',names:{ru:['морковь','морковка'],en:['carrot','carrots']},label:{ru:'Морковь',en:'Carrot'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Богата бета-каротином и клетчаткой',en:'Rich in beta-carotene and fiber'}},
+  {id:'potato',emoji:'🥔',names:{ru:['картошка','картофель','картофельное пюре'],en:['potato','potatoes','mashed potato']},label:{ru:'Картофель',en:'Potato'},
+   ratings:{diabetes:2,cholesterol:0,pressure:0,gastritis:0,kidneys:1,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Высокий ГИ, особенно пюре и жареный',en:'High GI, especially mashed and fried'}},
+  {id:'tomato',emoji:'🍅',names:{ru:['помидор','томат'],en:['tomato','tomatoes']},label:{ru:'Помидор',en:'Tomato'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Кислота может раздражать слизистую при гастрите',en:'Acidity may irritate stomach lining in gastritis'}},
+  {id:'cucumber',emoji:'🥒',names:{ru:['огурец','огурцы'],en:['cucumber']},label:{ru:'Огурец',en:'Cucumber'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Освежает, очень низкокалорийный',en:'Refreshing, very low calorie'}},
+  {id:'cabbage',emoji:'🥬',names:{ru:['капуста','белокочанная капуста'],en:['cabbage','white cabbage']},label:{ru:'Капуста',en:'Cabbage'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:1},allergens:[],
+   tips:{ru:'Может вызвать вздутие при гастрите',en:'May cause bloating in gastritis'}},
+  {id:'beet',emoji:'🫀',names:{ru:['свёкла','свекла'],en:['beet','beetroot']},label:{ru:'Свёкла',en:'Beetroot'},
+   ratings:{diabetes:1,cholesterol:0,pressure:0,gastritis:0,kidneys:1,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Полезна для печени, умеренно при диабете',en:'Good for liver, moderate intake for diabetes'}},
+  {id:'spinach',emoji:'🥬',names:{ru:['шпинат'],en:['spinach']},label:{ru:'Шпинат',en:'Spinach'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:1,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Богат оксалатами, ограничить при мочекаменной болезни',en:'High in oxalates; limit with kidney stones'}},
+  {id:'garlic',emoji:'🧄',names:{ru:['чеснок'],en:['garlic']},label:{ru:'Чеснок',en:'Garlic'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:2,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Сильно раздражает желудок при гастрите',en:'Strongly irritates stomach lining in gastritis'}},
+  {id:'onion',emoji:'🧅',names:{ru:['лук','лук репчатый'],en:['onion']},label:{ru:'Лук',en:'Onion'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Умеренно при гастрите, лучше варёный',en:'Moderate in gastritis; cooked is better'}},
+  // FRUITS
+  {id:'apple',emoji:'🍎',names:{ru:['яблоко','яблоки'],en:['apple','apples']},label:{ru:'Яблоко',en:'Apple'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Богато пектином и витамином C',en:'Rich in pectin and vitamin C'}},
+  {id:'banana',emoji:'🍌',names:{ru:['банан','бананы'],en:['banana','bananas']},label:{ru:'Банан',en:'Banana'},
+   ratings:{diabetes:1,cholesterol:0,pressure:0,gastritis:0,kidneys:1,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Умеренно при диабете, богат калием',en:'Moderate in diabetes; rich in potassium'}},
+  {id:'orange',emoji:'🍊',names:{ru:['апельсин','апельсины'],en:['orange','oranges']},label:{ru:'Апельсин',en:'Orange'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['citrus'],
+   tips:{ru:'Кислота раздражает желудок при гастрите',en:'Acid may irritate stomach in gastritis'}},
+  {id:'strawberry',emoji:'🍓',names:{ru:['клубника'],en:['strawberry','strawberries']},label:{ru:'Клубника',en:'Strawberry'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Богата антиоксидантами, умеренно при гастрите',en:'Rich in antioxidants; moderate in gastritis'}},
+  {id:'watermelon',emoji:'🍉',names:{ru:['арбуз'],en:['watermelon']},label:{ru:'Арбуз',en:'Watermelon'},
+   ratings:{diabetes:1,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Высокий ГИ несмотря на водянистость',en:'High GI despite its watery content'}},
+  {id:'grapes',emoji:'🍇',names:{ru:['виноград'],en:['grapes']},label:{ru:'Виноград',en:'Grapes'},
+   ratings:{diabetes:2,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Высокое содержание сахара, не рекомендуется при диабете',en:'High sugar; not recommended for diabetes'}},
+  {id:'avocado',emoji:'🥑',names:{ru:['авокадо'],en:['avocado']},label:{ru:'Авокадо',en:'Avocado'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Полезные жиры, но калорийное',en:'Healthy fats, but calorie-dense'}},
+  // MEAT & POULTRY
+  {id:'chicken',emoji:'🍗',names:{ru:['курица','куриное мясо','куриная грудка'],en:['chicken','chicken breast','chicken fillet']},label:{ru:'Курица',en:'Chicken'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Нежирный белок, отличный выбор',en:'Lean protein, excellent choice'}},
+  {id:'beef',emoji:'🥩',names:{ru:['говядина','говяжий стейк','стейк'],en:['beef','steak','beef steak']},label:{ru:'Говядина',en:'Beef'},
+   ratings:{diabetes:0,cholesterol:1,pressure:0,gastritis:0,kidneys:1,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Нежирная говядина допустима, умеренно',en:'Lean beef is fine in moderation'}},
+  {id:'pork',emoji:'🥩',names:{ru:['свинина','свиные рёбра'],en:['pork','pork ribs']},label:{ru:'Свинина',en:'Pork'},
+   ratings:{diabetes:0,cholesterol:2,pressure:1,gastritis:1,kidneys:1,weight:1,liver:1,thyroid:0},allergens:[],
+   tips:{ru:'Жирная свинина нагружает печень и повышает холестерин',en:'Fatty pork burdens liver and raises cholesterol'}},
+  {id:'sausage',emoji:'🌭',names:{ru:['сосиска','сосиски','колбаса','сардельки'],en:['sausage','hot dog','salami']},label:{ru:'Колбаса / сосиски',en:'Sausage'},
+   ratings:{diabetes:1,cholesterol:2,pressure:2,gastritis:2,kidneys:2,weight:2,liver:2,thyroid:1},allergens:[],
+   tips:{ru:'Высокое содержание натрия, жира и консервантов',en:'High in sodium, fat and preservatives'}},
+  {id:'turkey',emoji:'🦃',names:{ru:['индейка','грудка индейки'],en:['turkey','turkey breast']},label:{ru:'Индейка',en:'Turkey'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Диетический вариант мяса, богат белком',en:'Lean meat, high in protein'}},
+  // FISH & SEAFOOD
+  {id:'salmon',emoji:'🐟',names:{ru:['лосось','сёмга','форель'],en:['salmon','trout']},label:{ru:'Лосось',en:'Salmon'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['seafood'],
+   tips:{ru:'Богат омега-3, очень полезен',en:'Rich in omega-3, highly beneficial'}},
+  {id:'tuna',emoji:'🐟',names:{ru:['тунец'],en:['tuna']},label:{ru:'Тунец',en:'Tuna'},
+   ratings:{diabetes:0,cholesterol:0,pressure:1,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['seafood'],
+   tips:{ru:'Может содержать ртуть, умеренно',en:'May contain mercury; eat in moderation'}},
+  {id:'shrimp',emoji:'🦐',names:{ru:['креветки','креветка'],en:['shrimp','prawns']},label:{ru:'Креветки',en:'Shrimp'},
+   ratings:{diabetes:0,cholesterol:1,pressure:1,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['seafood'],
+   tips:{ru:'Умеренно при высоком холестерине',en:'Moderate when cholesterol is high'}},
+  // DAIRY
+  {id:'milk',emoji:'🥛',names:{ru:['молоко'],en:['milk']},label:{ru:'Молоко',en:'Milk'},
+   ratings:{diabetes:0,cholesterol:1,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['lactose'],
+   tips:{ru:'Цельное молоко умеренно при высоком холестерине',en:'Whole milk in moderation when cholesterol is high'}},
+  {id:'kefir',emoji:'🥛',names:{ru:['кефир'],en:['kefir']},label:{ru:'Кефир',en:'Kefir'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['lactose'],
+   tips:{ru:'Отличный пробиотик, полезен для кишечника',en:'Excellent probiotic, good for gut health'}},
+  {id:'yogurt',emoji:'🥛',names:{ru:['йогурт','йогурт натуральный'],en:['yogurt','yoghurt']},label:{ru:'Йогурт',en:'Yogurt'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['lactose'],
+   tips:{ru:'Натуральный йогурт без сахара — отличный выбор',en:'Plain yogurt without sugar is excellent'}},
+  {id:'cheese',emoji:'🧀',names:{ru:['сыр','твёрдый сыр'],en:['cheese','hard cheese','cheddar']},label:{ru:'Сыр',en:'Cheese'},
+   ratings:{diabetes:0,cholesterol:1,pressure:1,gastritis:0,kidneys:1,weight:1,liver:0,thyroid:0},allergens:['lactose'],
+   tips:{ru:'Умеренно из-за высокого содержания натрия и жира',en:'Moderate due to high sodium and fat content'}},
+  {id:'cottage_cheese',emoji:'🥛',names:{ru:['творог'],en:['cottage cheese','curd']},label:{ru:'Творог',en:'Cottage cheese'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['lactose'],
+   tips:{ru:'Богат белком и кальцием',en:'Rich in protein and calcium'}},
+  {id:'butter',emoji:'🧈',names:{ru:['сливочное масло','масло сливочное'],en:['butter']},label:{ru:'Сливочное масло',en:'Butter'},
+   ratings:{diabetes:0,cholesterol:2,pressure:1,gastritis:0,kidneys:0,weight:2,liver:1,thyroid:0},allergens:['lactose'],
+   tips:{ru:'Насыщенные жиры, ограничить при холестерине',en:'Saturated fat; limit when cholesterol is high'}},
+  // EGGS
+  {id:'egg',emoji:'🥚',names:{ru:['яйцо','яйца','варёное яйцо'],en:['egg','eggs','boiled egg']},label:{ru:'Яйцо',en:'Egg'},
+   ratings:{diabetes:0,cholesterol:1,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:['eggs'],
+   tips:{ru:'1-2 яйца в день допустимы даже при холестерине',en:'1-2 eggs per day acceptable even with high cholesterol'}},
+  // OILS
+  {id:'olive_oil',emoji:'🫒',names:{ru:['оливковое масло'],en:['olive oil']},label:{ru:'Оливковое масло',en:'Olive oil'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Полезные мононенасыщенные жиры',en:'Healthy monounsaturated fats'}},
+  {id:'sunflower_oil',emoji:'🌻',names:{ru:['подсолнечное масло'],en:['sunflower oil']},label:{ru:'Подсолнечное масло',en:'Sunflower oil'},
+   ratings:{diabetes:0,cholesterol:1,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Омега-6, умеренно',en:'High omega-6; use in moderation'}},
+  // NUTS & SEEDS
+  {id:'walnuts',emoji:'🌰',names:{ru:['грецкий орех','грецкие орехи'],en:['walnut','walnuts']},label:{ru:'Грецкие орехи',en:'Walnuts'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:['nuts'],
+   tips:{ru:'Богаты омега-3 и антиоксидантами',en:'Rich in omega-3 and antioxidants'}},
+  {id:'almonds',emoji:'🌰',names:{ru:['миндаль'],en:['almond','almonds']},label:{ru:'Миндаль',en:'Almonds'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:1,liver:0,thyroid:0},allergens:['nuts'],
+   tips:{ru:'Полезные жиры и витамин E',en:'Healthy fats and vitamin E'}},
+  {id:'peanuts',emoji:'🥜',names:{ru:['арахис','арахисовое масло'],en:['peanut','peanuts','peanut butter']},label:{ru:'Арахис',en:'Peanuts'},
+   ratings:{diabetes:0,cholesterol:1,pressure:0,gastritis:1,kidneys:0,weight:1,liver:0,thyroid:0},allergens:['nuts'],
+   tips:{ru:'Технически бобовый, умеренно',en:'Technically a legume; moderate intake'}},
+  // LEGUMES
+  {id:'lentils',emoji:'🫘',names:{ru:['чечевица'],en:['lentils','lentil']},label:{ru:'Чечевица',en:'Lentils'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Отличный источник белка и клетчатки',en:'Excellent source of protein and fiber'}},
+  {id:'beans',emoji:'🫘',names:{ru:['фасоль','бобы'],en:['beans','kidney beans']},label:{ru:'Фасоль',en:'Beans'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Может вызвать вздутие при гастрите',en:'May cause bloating in gastritis'}},
+  // DRINKS
+  {id:'water',emoji:'💧',names:{ru:['вода','минеральная вода'],en:['water','mineral water']},label:{ru:'Вода',en:'Water'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Лучший напиток для всех состояний',en:'Best drink for all conditions'}},
+  {id:'green_tea',emoji:'🍵',names:{ru:['зелёный чай','чай зелёный'],en:['green tea']},label:{ru:'Зелёный чай',en:'Green tea'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Богат антиоксидантами, осторожно при гастрите',en:'Rich in antioxidants; caution in gastritis'}},
+  {id:'coffee',emoji:'☕',names:{ru:['кофе','эспрессо','капучино'],en:['coffee','espresso','cappuccino']},label:{ru:'Кофе',en:'Coffee'},
+   ratings:{diabetes:0,cholesterol:1,pressure:2,gastritis:2,kidneys:1,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Повышает давление, раздражает желудок',en:'Raises blood pressure, irritates stomach'}},
+  {id:'juice',emoji:'🧃',names:{ru:['сок','апельсиновый сок','яблочный сок'],en:['juice','orange juice','apple juice']},label:{ru:'Сок',en:'Juice'},
+   ratings:{diabetes:2,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Высокое содержание сахара, лучше цельный фрукт',en:'High sugar; whole fruit is better'}},
+  {id:'soda',emoji:'🥤',names:{ru:['газировка','лимонад','кола','кока-кола'],en:['soda','cola','lemonade','fizzy drink']},label:{ru:'Газировка',en:'Soda'},
+   ratings:{diabetes:2,cholesterol:0,pressure:1,gastritis:2,kidneys:2,weight:2,liver:1,thyroid:1},allergens:[],
+   tips:{ru:'Сахар, газ и кислота вредны для всех органов',en:'Sugar, gas and acid harm all organs'}},
+  {id:'alcohol',emoji:'🍺',names:{ru:['алкоголь','пиво','вино','водка'],en:['alcohol','beer','wine','vodka']},label:{ru:'Алкоголь',en:'Alcohol'},
+   ratings:{diabetes:2,cholesterol:1,pressure:2,gastritis:2,kidneys:2,weight:1,liver:2,thyroid:1},allergens:[],
+   tips:{ru:'Вреден при всех перечисленных состояниях',en:'Harmful for all listed conditions'}},
+  // FAST FOOD
+  {id:'burger',emoji:'🍔',names:{ru:['бургер','гамбургер','чизбургер'],en:['burger','hamburger','cheeseburger']},label:{ru:'Бургер',en:'Burger'},
+   ratings:{diabetes:1,cholesterol:2,pressure:2,gastritis:1,kidneys:1,weight:2,liver:1,thyroid:0},allergens:['gluten','lactose'],
+   tips:{ru:'Высококалорийный, много натрия и жира',en:'High calorie, high sodium and fat'}},
+  {id:'pizza',emoji:'🍕',names:{ru:['пицца'],en:['pizza']},label:{ru:'Пицца',en:'Pizza'},
+   ratings:{diabetes:1,cholesterol:1,pressure:1,gastritis:1,kidneys:1,weight:2,liver:1,thyroid:0},allergens:['gluten','lactose'],
+   tips:{ru:'Много калорий и натрия',en:'High in calories and sodium'}},
+  {id:'fries',emoji:'🍟',names:{ru:['картошка фри','фри'],en:['french fries','fries','chips']},label:{ru:'Картофель фри',en:'French fries'},
+   ratings:{diabetes:2,cholesterol:2,pressure:2,gastritis:1,kidneys:1,weight:2,liver:2,thyroid:0},allergens:[],
+   tips:{ru:'Транс-жиры и высокий ГИ — избегать',en:'Trans fats and high GI — avoid'}},
+  // SOUPS
+  {id:'chicken_soup',emoji:'🍲',names:{ru:['куриный суп','бульон куриный'],en:['chicken soup','chicken broth']},label:{ru:'Куриный суп',en:'Chicken soup'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:0,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Лёгкий и питательный, идеален для желудка',en:'Light and nutritious, ideal for stomach'}},
+  {id:'borscht',emoji:'🍲',names:{ru:['борщ'],en:['borscht','beet soup']},label:{ru:'Борщ',en:'Borscht'},
+   ratings:{diabetes:0,cholesterol:0,pressure:0,gastritis:1,kidneys:0,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Умеренно при гастрите из-за томатов и капусты',en:'Moderate in gastritis due to tomatoes and cabbage'}},
+  // CONDIMENTS
+  {id:'salt',emoji:'🧂',names:{ru:['соль'],en:['salt']},label:{ru:'Соль',en:'Salt'},
+   ratings:{diabetes:0,cholesterol:0,pressure:2,gastritis:0,kidneys:2,weight:0,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Главный враг давления и почек',en:'Major enemy of blood pressure and kidneys'}},
+  {id:'ketchup',emoji:'🍅',names:{ru:['кетчуп','томатный соус'],en:['ketchup','tomato sauce']},label:{ru:'Кетчуп',en:'Ketchup'},
+   ratings:{diabetes:1,cholesterol:0,pressure:1,gastritis:2,kidneys:1,weight:1,liver:0,thyroid:0},allergens:[],
+   tips:{ru:'Сахар, кислота и соль — нежелательно при гастрите',en:'Sugar, acid and salt — unwanted in gastritis'}},
+  {id:'mayonnaise',emoji:'🥚',names:{ru:['майонез'],en:['mayonnaise']},label:{ru:'Майонез',en:'Mayonnaise'},
+   ratings:{diabetes:0,cholesterol:2,pressure:1,gastritis:1,kidneys:0,weight:2,liver:1,thyroid:0},allergens:['eggs'],
+   tips:{ru:'Очень жирный, повышает холестерин',en:'Very fatty, raises cholesterol'}},
+];
+
+/* ===== STATE ===== */
+let currentLang = 'ru';
+let profile = {conditions:{}, allergies:{}};
+let history = [];
+let currentTags = [];
+let currentPhoto = null;
+let currentResults = [];
+let suggestFocusIdx = -1;
+
+/* ===== INIT ===== */
+function init(){
+  try {
+    const lp = localStorage.getItem('nc_profile');
+    if(lp) profile = JSON.parse(lp);
+    const lh = localStorage.getItem('nc_history');
+    if(lh) history = JSON.parse(lh);
+    const ll = localStorage.getItem('nc_lang');
+    if(ll) currentLang = ll;
+  } catch(e){}
+  applyLang();
+  renderConditions();
+  renderAllergies();
+  renderHistory();
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('#tagWrap')) hideSuggestions();
+  });
+}
+
+/* ===== LANG ===== */
+function toggleLang(){
+  currentLang = currentLang==='ru'?'en':'ru';
+  try{localStorage.setItem('nc_lang',currentLang)}catch(e){}
+  applyLang();
+  renderConditions();
+  renderAllergies();
+  renderHistory();
+  if(currentResults.length) showResults(currentResults);
+}
+function applyLang(){
+  const t=T[currentLang];
+  document.getElementById('langBtn').textContent = currentLang==='ru'?'EN':'RU';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(t[k]!==undefined) el.textContent=t[k];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-placeholder');
+    if(t[k]!==undefined) el.placeholder=t[k];
+  });
+}
+
+/* ===== PAGES ===== */
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page'+name).classList.add('active');
+  document.getElementById('nav'+name).classList.add('active');
+  if(name==='History') renderHistory();
+}
+
+/* ===== PHOTO ===== */
+function handlePhoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    currentPhoto = e.target.result;
+    document.getElementById('photoPreview').src = currentPhoto;
+    document.getElementById('uploadArea').hidden = true;
+    document.getElementById('previewArea').hidden = false;
+  };
+  reader.readAsDataURL(file);
+}
+function clearPhoto(){
+  currentPhoto = null;
+  document.getElementById('photoInput').value='';
+  document.getElementById('uploadArea').hidden = false;
+  document.getElementById('previewArea').hidden = true;
+  document.getElementById('photoPreview').src='';
+}
+
+/* ===== TAG INPUT ===== */
+function focusTagInput(){ document.getElementById('tagInput').focus(); }
+function renderTags(){
+  const container = document.getElementById('tagsContainer');
+  container.innerHTML = currentTags.map((t,i)=>`
+    <span class="tag">${t.emoji} ${t.label[currentLang]}
+      <button class="tag-remove" onclick="removeTag(${i})">×</button>
+    </span>`).join('');
+}
+function removeTag(i){ currentTags.splice(i,1); renderTags(); hideSuggestions(); }
+
+function onTagInput(){
+  const v = document.getElementById('tagInput').value.trim().toLowerCase();
+  if(!v){hideSuggestions();return;}
+  const matches = findFood(v).slice(0,8);
+  if(!matches.length){hideSuggestions();return;}
+  showSuggestions(matches);
+}
+function onTagKey(e){
+  const sug = document.getElementById('suggestions');
+  const items = sug.querySelectorAll('.suggestion-item');
+  if(e.key==='ArrowDown'){e.preventDefault();suggestFocusIdx=Math.min(suggestFocusIdx+1,items.length-1);focusSugItem(items);}
+  else if(e.key==='ArrowUp'){e.preventDefault();suggestFocusIdx=Math.max(suggestFocusIdx-1,0);focusSugItem(items);}
+  else if(e.key==='Enter'){
+    e.preventDefault();
+    if(suggestFocusIdx>=0&&items[suggestFocusIdx]) items[suggestFocusIdx].click();
+    else{
+      const v=document.getElementById('tagInput').value.trim();
+      if(v){
+        const found=findFood(v.toLowerCase());
+        if(found.length) selectSuggestion(found[0]);
+        else addCustomTag(v);
+      }
+    }
+  } else if(e.key==='Backspace'&&!document.getElementById('tagInput').value&&currentTags.length){
+    currentTags.pop(); renderTags();
+  }
+}
+function focusSugItem(items){
+  items.forEach((it,i)=>it.classList.toggle('focused',i===suggestFocusIdx));
+  if(items[suggestFocusIdx]) items[suggestFocusIdx].scrollIntoView({block:'nearest'});
+}
+function findFood(query){
+  return FOOD_DB.filter(f=>{
+    const names = [...(f.names.ru||[]),...(f.names.en||[])];
+    return names.some(n=>n.includes(query));
+  });
+}
+function showSuggestions(matches){
+  suggestFocusIdx=-1;
+  const sug = document.getElementById('suggestions');
+  sug.hidden=false;
+  sug.innerHTML = matches.map(f=>`
+    <div class="suggestion-item" onclick="selectSuggestion(${JSON.stringify(f).replace(/"/g,'&quot;')})">
+      <span class="suggestion-emoji">${f.emoji}</span>
+      <span>${f.label[currentLang]}</span>
+    </div>`).join('');
+}
+function hideSuggestions(){
+  document.getElementById('suggestions').hidden=true;
+  suggestFocusIdx=-1;
+}
+function selectSuggestion(f){
+  if(!currentTags.find(t=>t.id===f.id)) currentTags.push(f);
+  document.getElementById('tagInput').value='';
+  hideSuggestions();
+  renderTags();
+}
+function addCustomTag(name){
+  currentTags.push({id:'custom_'+Date.now(),emoji:'🍽️',names:{ru:[name],en:[name]},
+    label:{ru:name,en:name},ratings:{},allergens:[],tips:{ru:'',en:''}});
+  document.getElementById('tagInput').value='';
+  renderTags();
+}
+
+/* ===== ANALYZE ===== */
+function analyzeFood(){
+  if(!currentTags.length){showToast(T[currentLang].addFood);return;}
+  const hasProfile = Object.values(profile.conditions).some(Boolean)||Object.values(profile.allergies).some(Boolean);
+  if(!hasProfile){showToast(T[currentLang].noProfile);showPage('Profile');return;}
+  currentResults = currentTags.map(food=>analyzeItem(food));
+  showResults(currentResults);
+}
+
+function analyzeItem(food){
+  const t=T[currentLang];
+  const activeConditions = CONDITIONS.filter(c=>profile.conditions[c]);
+  const activeAllergies = ALLERGIES.filter(a=>profile.allergies[a]);
+  const badges=[];
+  let maxRating=0;
+
+  if(food.ratings && Object.keys(food.ratings).length){
+    activeConditions.forEach(c=>{
+      const r=food.ratings[c]??0;
+      if(r>maxRating) maxRating=r;
+      const cls=r===0?'green':r===1?'yellow':'red';
+      const emoji=r===0?'🟢':r===1?'🟡':'🔴';
+      badges.push({cls,emoji,label:`${t.condIcons[c]} ${t.conditions[c]}`});
+    });
+    activeAllergies.forEach(a=>{
+      if(food.allergens&&food.allergens.includes(a)){
+        maxRating=2;
+        badges.push({cls:'red',emoji:'⚠️',label:`${t.allergyIcons[a]} ${t.allergies[a]}`});
+      }
+    });
+  } else {
+    badges.push({cls:'yellow',emoji:'❓',label:t.unknown});
+    maxRating=1;
+  }
+  return {food,badges,rating:maxRating};
+}
+
+function showResults(results){
+  const t=T[currentLang];
+  const avgRating = results.reduce((s,r)=>s+r.rating,0)/results.length;
+  const overallCls = avgRating<0.5?'green':avgRating<1.5?'yellow':'red';
+  const overallEmoji = overallCls==='green'?'🟢':overallCls==='yellow'?'🟡':'🔴';
+  const overallLabel = overallCls==='green'?t.scoreGreen:overallCls==='yellow'?t.scoreYellow:t.scoreRed;
+
+  let html=`<div class="meal-score ${overallCls}">
+    <div class="score-emoji">${overallEmoji}</div>
+    <div class="score-label">${overallLabel}</div>
+    <div class="score-desc">${t.overallScore}</div>
+  </div>`;
+
+  results.forEach(r=>{
+    const trafficEmoji=r.rating===0?'🟢':r.rating===1?'🟡':'🔴';
+    html+=`<div class="food-result">
+      <div class="food-result-header">
+        <span class="food-emoji">${r.food.emoji}</span>
+        <span class="food-name">${r.food.label[currentLang]}</span>
+        <span class="traffic-light">${trafficEmoji}</span>
+      </div>
+      <div class="badges">${r.badges.map(b=>`<span class="badge ${b.cls}">${b.emoji} ${b.label}</span>`).join('')}</div>
+      ${r.food.tips&&r.food.tips[currentLang]?`<div class="food-tip">${r.food.tips[currentLang]}</div>`:''}
+    </div>`;
+  });
+
+  html+=`<button class="save-meal-btn" onclick="saveMeal()">${t.saveMeal}</button>`;
+
+  const sec=document.getElementById('resultsSection');
+  sec.innerHTML=html;
+  sec.hidden=false;
+  sec.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ===== SAVE MEAL ===== */
+function saveMeal(){
+  const meal={
+    id:Date.now(),
+    date:new Date().toISOString(),
+    photo:currentPhoto,
+    foods:currentTags.map(f=>({id:f.id,emoji:f.emoji,label:f.label})),
+    results:currentResults.map(r=>({rating:r.rating}))
+  };
+  history.unshift(meal);
+  try{localStorage.setItem('nc_history',JSON.stringify(history))}catch(e){}
+  showToast(T[currentLang].saved);
+}
+
+/* ===== HISTORY ===== */
+function renderHistory(){
+  const t=T[currentLang];
+  const list=document.getElementById('historyList');
+  if(!history.length){
+    list.innerHTML=`<div class="history-empty"><div class="empty-icon">🍽️</div>
+      <div>${t.historyEmpty}</div><div style="font-size:13px;margin-top:4px">${t.historyEmptySub}</div></div>`;
+    return;
+  }
+  list.innerHTML=history.map(m=>{
+    const date=new Date(m.date);
+    const dateStr=date.toLocaleDateString(currentLang==='ru'?'ru-RU':'en-US',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const names=m.foods.map(f=>f.label[currentLang]||f.label.ru||f.label.en||f.emoji).join(', ');
+    const avgR=m.results.reduce((s,r)=>s+r.rating,0)/m.results.length;
+    const scoreEmoji=avgR<0.5?'🟢':avgR<1.5?'🟡':'🔴';
+    const thumb=m.photo?`<img src="${m.photo}" alt="">`:m.foods[0]?`<span>${m.foods[0].emoji||'🍽️'}</span>`:`<span>🍽️</span>`;
+    return `<div class="history-item" onclick="showHistoryDetail(${m.id})">
+      <div class="history-thumb">${thumb}</div>
+      <div class="history-info">
+        <div class="history-foods">${names}</div>
+        <div class="history-date">${dateStr}</div>
+      </div>
+      <div class="history-score">${scoreEmoji}</div>
+    </div>`;
+  }).join('');
+}
+function clearHistory(){
+  history=[];
+  try{localStorage.removeItem('nc_history')}catch(e){}
+  renderHistory();
+  showToast(T[currentLang].cleared);
+}
+function showHistoryDetail(id){
+  const meal=history.find(m=>m.id===id);
+  if(!meal) return;
+  const t=T[currentLang];
+  const date=new Date(meal.date);
+  const dateStr=date.toLocaleDateString(currentLang==='ru'?'ru-RU':'en-US',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let html=`<div style="font-size:13px;color:var(--fg3);margin-bottom:12px">${dateStr}</div>`;
+  if(meal.photo) html+=`<img src="${meal.photo}" style="width:100%;border-radius:10px;margin-bottom:12px;max-height:200px;object-fit:cover">`;
+  meal.foods.forEach((f,i)=>{
+    const r=meal.results[i]||{rating:1};
+    const emoji=r.rating===0?'🟢':r.rating===1?'🟡':'🔴';
+    html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:22px">${f.emoji}</span>
+      <span style="flex:1;font-weight:600">${f.label[currentLang]||f.label.ru}</span>
+      <span style="font-size:20px">${emoji}</span></div>`;
+  });
+  const overlay=document.getElementById('modalOverlay');
+  document.getElementById('modalBody').innerHTML=html;
+  overlay.hidden=false;
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').hidden=true;
+}
+
+/* ===== PROFILE ===== */
+function renderConditions(){
+  const t=T[currentLang];
+  const grid=document.getElementById('conditionsGrid');
+  grid.innerHTML=CONDITIONS.map(c=>`
+    <div class="condition-card${profile.conditions[c]?' active':''}" onclick="toggleCondition('${c}')">
+      <span class="cond-icon">${t.condIcons[c]}</span>
+      <span class="cond-name">${t.conditions[c]}</span>
+      <span class="cond-check">${profile.conditions[c]?'✓':''}</span>
+    </div>`).join('');
+}
+function toggleCondition(c){
+  profile.conditions[c]=!profile.conditions[c];
+  saveProfile();
+  renderConditions();
+}
+function renderAllergies(){
+  const t=T[currentLang];
+  const wrap=document.getElementById('allergiesWrap');
+  wrap.innerHTML=ALLERGIES.map(a=>`
+    <div class="allergy-chip${profile.allergies[a]?' active':''}" onclick="toggleAllergy('${a}')">
+      ${t.allergyIcons[a]} ${t.allergies[a]}
+    </div>`).join('');
+}
+function toggleAllergy(a){
+  profile.allergies[a]=!profile.allergies[a];
+  saveProfile();
+  renderAllergies();
+}
+function saveProfile(){
+  try{localStorage.setItem('nc_profile',JSON.stringify(profile))}catch(e){}
+}
+
+/* ===== TOAST ===== */
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+init();
+</script>
